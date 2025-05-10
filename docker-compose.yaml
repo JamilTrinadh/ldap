@@ -1,0 +1,13 @@
+version: '2'
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    container_name: ldap
+    environment:
+      - LDAP_ORGANISATION=jamiorg
+      - LDAP_DOMAIN=jami.in
+      - LDAP_BASE_DN=dc=jami,dc=in
+      - LDAP_ADMIN_PASSWORD=jami
+    ports:
+      - 389:389
+      - 636:636

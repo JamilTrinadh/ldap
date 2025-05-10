@@ -1,0 +1,20 @@
+# Java/Maven
+/ldap/target/
+/ldap/.classpath
+/ldap/.project
+/ldap/.settings
+
+# IDE files
+/ldap/.idea/
+/ldap/.vscode/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Sensitive properties
+**/application.properties
+**/application.yml
+

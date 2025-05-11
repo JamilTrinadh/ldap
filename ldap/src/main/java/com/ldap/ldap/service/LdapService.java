@@ -59,4 +59,90 @@ public class LdapService {
         }
     }
 
+    public String createUser(String username, String password, String ouName) {
+        try {
+            DirContext context = getLdapContext();
+
+            // DN for the user
+            String dn = "cn=" + username + ",ou=" + ouName + ",dc=jami,dc=in";
+
+            // Set user attributes
+            Attributes attrs = new BasicAttributes();
+            Attribute objClass = new BasicAttribute("objectClass");
+            objClass.add("top");
+            objClass.add("person");
+            objClass.add("organizationalPerson");
+            objClass.add("inetOrgPerson");
+            attrs.put(objClass);
+            attrs.put("cn", username);
+            attrs.put("sn", username); // Required for 'person'
+            attrs.put("userPassword", password); // Plaintext or hashed
+
+            // Create the user
+            context.createSubcontext(dn, attrs);
+            context.close();
+
+            return "User '" + username + "' created successfully.";
+        } catch (NamingException e) {
+            e.printStackTrace();
+            return "Error creating user: " + e.getMessage();
+        }
+    }
+
+    public String createGroup(String groupName, String ouName) {
+        try {
+            DirContext context = getLdapContext();
+
+            // DN for the group
+            String dn = "cn=" + groupName + ",ou=" + ouName + ",dc=jami,dc=in";
+
+            // Set group attributes
+            Attributes attrs = new BasicAttributes();
+            Attribute objClass = new BasicAttribute("objectClass");
+            objClass.add("top");
+            objClass.add("groupOfNames");
+            attrs.put(objClass);
+            attrs.put("cn", groupName);
+
+            // 'groupOfNames' requires at least one 'member'
+            // Add a dummy DN (should be real in production)
+            attrs.put("member", "cn=dummy,ou=" + ouName + ",dc=jami,dc=in");
+
+            // Create group
+            context.createSubcontext(dn, attrs);
+            context.close();
+
+            return "Group '" + groupName + "' created successfully.";
+        } catch (NamingException e) {
+            e.printStackTrace();
+            return "Error creating group: " + e.getMessage();
+        }
+    }
+
+    public String addUserToGroup(String username, String userOu, String groupName, String groupOu) {
+        try {
+            DirContext context = getLdapContext();
+
+            // DNs
+            String userDN = "cn=" + username + ",ou=" + userOu + ",dc=jami,dc=in";
+            String groupDN = "cn=" + groupName + ",ou=" + groupOu + ",dc=jami,dc=in";
+
+            // Modify group to add member
+            ModificationItem[] mods = new ModificationItem[1];
+            Attribute mod = new BasicAttribute("member", userDN);
+            mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE, mod);
+
+            context.modifyAttributes(groupDN, mods);
+            context.close();
+
+            return "User '" + username + "' added to group '" + groupName + "'.";
+        } catch (NamingException e) {
+            e.printStackTrace();
+            return "Error adding user to group: " + e.getMessage();
+        }
+    }
+
+
+
+
 }
